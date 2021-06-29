@@ -5,7 +5,7 @@ const aux = require('./aux.js');
 
 const credentials = require('../credentials/menteor-back.json');
 const spreadsheetId = process.env.SPREADSHEETID;
-const tabName = "Pedidos1";
+const sheetName = "Pedidos1";
 const auth = new google.auth.GoogleAuth({
   keyFile: "credentials/menteor-back.json",
   scopes: "https://www.googleapis.com/auth/spreadsheets"
@@ -18,7 +18,7 @@ exports.getSheet = async (req, res) => {
   const getRows = await googleSheets.spreadsheets.values.get({
     auth,
     spreadsheetId,
-    range: tabName
+    range: sheetName + '!2:1000'
   })
 
   res.status(200).send(getRows.data);
@@ -34,18 +34,19 @@ exports.getSheetCols = async (req, res) => {
   const getRows = await googleSheets.spreadsheets.values.get({
     auth,
     spreadsheetId,
-    range: tabName + colA + ':' + colB
+    range: sheetName + '!' + colA + ':' + colB
   })
 
   res.status(200).send(getRows.data);
 };
 
-exports.getRow = async (req, res) => {
+exports.getRowById = async (req, res) => {
   const doc = new GoogleSpreadsheet(spreadsheetId);
   await promisify(doc.useServiceAccountAuth)(credentials);
   const info = await promisify(doc.getInfo)();
   const sheet = info.worksheets[0];
 
+  // Search rows where the 'id' column matches.
   var rows = await promisify(sheet.getRows)({
     query: 'id = ' + req.params.id
   });
@@ -86,7 +87,7 @@ exports.writeRow = async (req, res) => {
     await googleSheets.spreadsheets.values.append({
       auth,
       spreadsheetId,
-      range: tabName,
+      range: sheetName,
       valueInputOption: "USER_ENTERED",
       resource: {
         values: [

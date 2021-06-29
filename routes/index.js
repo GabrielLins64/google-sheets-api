@@ -12,6 +12,6 @@ module.exports = function (app) {
   
   app
       .route('/:id')
-      .get(functions.getRow)
+      .get(functions.getRowById)
       .patch(functions.updateStatus);
 };
